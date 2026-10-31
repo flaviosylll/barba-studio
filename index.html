@@ -7,28 +7,115 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
-    header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; }
+    
+    body { 
+      background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.88)), url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+      background-size: cover;
+      color: #e0e0e0; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      min-height: 100vh; 
+      padding: 20px; 
+    }
+
+    header { 
+      width: 100%; 
+      max-width: 500px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 20px; 
+      padding: 10px; 
+      border-bottom: 1px solid rgba(243, 156, 18, 0.3); 
+    }
+
     .logo-container { display: flex; align-items: center; gap: 10px; }
-    .logo-container img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-    .logo-container h1 { font-size: 1.1rem; color: #f39c12; }
-    .logo-container span { display: block; font-size: 0.6rem; color: #aaa; letter-spacing: 1px; }
-    .btn-admin { background: transparent; border: 1px solid #f39c12; color: #f39c12; padding: 5px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .logo-container h1 { font-size: 1.2rem; color: #f39c12; font-weight: 700; letter-spacing: 0.5px; }
+    .logo-container span { display: block; font-size: 0.6rem; color: #aaa; letter-spacing: 1.5px; }
+
+    .btn-admin { 
+      background: transparent; 
+      border: 1px solid #f39c12; 
+      color: #f39c12; 
+      padding: 6px 14px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      text-decoration: none; 
+      font-size: 0.85rem; 
+      transition: all 0.3s;
+    }
     .btn-admin:hover { background: #f39c12; color: #121212; }
     
-    .card { background: #1e1e1e; border: 1px solid #333; border-radius: 8px; width: 100%; max-width: 400px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-top: 20px; }
-    .card h2 { color: #f39c12; text-align: center; margin-bottom: 8px; font-size: 1.4rem; }
-    .card p { text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 20px; }
+    .card { 
+      background: rgba(22, 22, 22, 0.92); 
+      border: 1px solid rgba(243, 156, 18, 0.4); 
+      border-radius: 12px; 
+      width: 100%; 
+      max-width: 420px; 
+      padding: 30px; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.7); 
+      margin-top: 20px; 
+      backdrop-filter: blur(5px);
+    }
     
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 0.8rem; color: #bbb; margin-bottom: 5px; }
-    .form-group input, .form-group select { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 5px; font-size: 0.95rem; }
-    .form-group input:focus, .form-group select:focus { border-color: #f39c12; outline: none; }
+    .card h2 { color: #f39c12; text-align: center; margin-bottom: 8px; font-size: 1.5rem; }
+    .card p { text-align: center; color: #b0b0b0; font-size: 0.85rem; margin-bottom: 25px; line-height: 1.4; }
     
-    .btn-primary { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; color: #ccc; margin-bottom: 6px; font-weight: 500; }
+    .form-group input, .form-group select { 
+      width: 100%; 
+      padding: 12px; 
+      background: rgba(30, 30, 30, 0.9); 
+      border: 1px solid #444; 
+      color: #fff; 
+      border-radius: 6px; 
+      font-size: 0.95rem; 
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #f39c12; outline: none; background: #222; }
+    
+    .btn-primary { 
+      width: 100%; 
+      padding: 13px; 
+      background: #27ae60; 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      margin-top: 10px; 
+      transition: background 0.2s;
+    }
     .btn-primary:hover { background: #219653; }
-    .btn-secondary { width: 100%; padding: 10px; background: transparent; color: #f39c12; border: 1px solid #f39c12; border-radius: 5px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-    .btn-secondary:hover { background: rgba(243, 156, 18, 0.1); }
+
+    .btn-secondary { 
+      width: 100%; 
+      padding: 11px; 
+      background: transparent; 
+      color: #f39c12; 
+      border: 1px solid #f39c12; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      margin-top: 10px; 
+      font-weight: bold; 
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(243, 156, 18, 0.15); }
+
+    .btn-danger-alt { 
+      width: 100%; 
+      padding: 11px; 
+      background: #c0392b; 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      margin-top: 10px; 
+    }
+    .btn-danger-alt:hover { background: #962d22; }
     
     .link-voltar { display: block; text-align: center; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
     .link-voltar:hover { color: #f39c12; }
@@ -51,9 +138,9 @@
   <!-- TELA DE BOAS-VINDAS -->
   <div id="card-boas-vindas" class="card">
     <h2>Bem-vindo ao Barba Studio</h2>
-    <p>Escolha uma opção para continuar</p>
-    <button class="btn-primary" onclick="mostrarTela('card-login')">Entrar na Conta</button>
-    <button class="btn-secondary" onclick="mostrarTela('card-cadastro')">Criar Nova Conta</button>
+    <p>Faça login ou crie sua conta para agendar seu horário com facilidade e rapidez.</p>
+    <button class="btn-secondary" onclick="mostrarTela('card-login')">Entrar na Conta</button>
+    <button class="btn-primary" onclick="mostrarTela('card-cadastro')">Criar Nova Conta</button>
   </div>
 
   <!-- TELA DE LOGIN -->
@@ -117,29 +204,29 @@
 
   <!-- TELA DE AGENDAMENTO -->
   <div id="card-agendamento" class="card hidden">
-    <h2>Agendar Atendimento</h2>
+    <h2>Novo Agendamento</h2>
     <p>Marque o seu horário com facilidade</p>
     <form onsubmit="realizarAgendamento(event)">
       <div class="form-group">
         <label>Cliente</label>
-        <input type="text" id="cliente-nome-input" readonly style="background: #222; color: #f39c12;">
+        <input type="text" id="cliente-nome-input" readonly style="background: #111; color: #f39c12; font-weight: bold;">
       </div>
       <div class="form-group">
-        <label>Selecionar Barbeiro</label>
+        <label>Selecione o Barbeiro</label>
         <select id="barbeiro-select" required>
           <option value="">A carregar barbeiros...</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Data do Agendamento</label>
+        <label>Data</label>
         <input type="date" id="data-agendamento" required>
       </div>
       <div class="form-group">
-        <label>Hora do Agendamento</label>
+        <label>Horário (09:00 às 21:00)</label>
         <input type="time" id="hora-agendamento" required>
       </div>
       <button type="submit" class="btn-primary">Confirmar Agendamento</button>
-      <button type="button" class="btn-secondary" onclick="sairCliente()">Sair da Conta</button>
+      <button type="button" class="btn-danger-alt" onclick="sairCliente()">Sair da Conta</button>
     </form>
   </div>
 

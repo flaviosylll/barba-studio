@@ -2,7 +2,6 @@
 const SUPABASE_URL = "https://amdiaevxeajvqktdrbnz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGlhZXZ4ZWFqdnFrdGRyYm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTEzMjMsImV4cCI6MjEwODk4NzMyM30.8Dt7jMKYa49BU7b8LgArnRvKzOhPZCpBMqpz3uVfhL8";
 
-// Função de segurança infalível para obter o cliente Supabase sem erros de inicialização
 function getSupabase() {
   if (window._supabaseClient) return window._supabaseClient;
   if (window.supabase && typeof window.supabase.createClient === 'function') {
@@ -41,7 +40,7 @@ async function carregarBarbeirosIndex() {
   
   const db = getSupabase();
   if (!db) {
-    setTimeout(carregarBarbeirosIndex, 500); // Tenta novamente se o CDN demorar
+    setTimeout(carregarBarbeirosIndex, 500);
     return;
   }
 
@@ -70,7 +69,7 @@ async function cadastrarCliente(event) {
   event.preventDefault();
   const db = getSupabase();
   if (!db) {
-    alert("Erro de conexão com a base de dados. Aguarde um momento e tente novamente.");
+    alert("Erro de conexão com a base de dados.");
     return;
   }
 
@@ -98,10 +97,7 @@ async function cadastrarCliente(event) {
 async function fazerLogin(event) {
   event.preventDefault();
   const db = getSupabase();
-  if (!db) {
-    alert("Erro de conexão com a base de dados.");
-    return;
-  }
+  if (!db) return;
 
   const telefone = document.getElementById("login-telefone").value.trim();
   const senha = document.getElementById("login-senha").value.trim();

@@ -8,39 +8,39 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #121212; color: #e0e0e0; padding: 20px; }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
-    h1 { color: #f39c12; font-size: 1.5rem; }
-    .btn-voltar { background: transparent; border: 1px solid #777; color: #ccc; padding: 8px 15px; border-radius: 5px; cursor: pointer; text-decoration: none; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    h1 { color: #f39c12; font-size: 1.3rem; letter-spacing: 0.5px; }
+    .btn-voltar { background: transparent; border: 1px solid #777; color: #ccc; padding: 8px 15px; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .btn-voltar:hover { background: #333; color: #fff; }
 
-    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .stat-card { background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
-    .stat-card h3 { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; text-transform: uppercase; }
+    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-card h3 { font-size: 0.75rem; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
     .stat-card span { font-size: 1.8rem; font-weight: bold; color: #f39c12; }
 
     .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
     @media(max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
 
-    .panel { background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 8px; }
-    .panel h2 { color: #f39c12; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+    .panel { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px; }
+    .panel h2 { color: #f39c12; font-size: 1.05rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
 
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
-    .form-group input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 5px; }
+    .form-group input { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; }
     
-    .btn-success { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .btn-success { width: 100%; padding: 11px; background: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
     .btn-success:hover { background: #219653; }
-    .btn-info { width: 100%; padding: 10px; background: #2980b9; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .btn-info { width: 100%; padding: 11px; background: #2980b9; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
     .btn-info:hover { background: #2471a3; }
-    .btn-danger { width: 100%; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-danger { width: 100%; padding: 11px; background: #c0392b; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
     .btn-danger:hover { background: #962d22; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
     th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
     th { color: #f39c12; }
     
-    .barbeiros-list { max-height: 150px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #333; border-radius: 5px; background: #252525; }
-    .barbeiro-item { padding: 8px 12px; border-bottom: 1px solid #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .barbeiros-list { max-height: 150px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #333; border-radius: 5px; background: #222; }
+    .barbeiro-item { padding: 10px 12px; border-bottom: 1px solid #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #ddd; }
     .barbeiro-item:hover { background: #333; }
     .barbeiro-item.selected { background: #f39c12; color: #121212; font-weight: bold; }
   </style>
@@ -192,7 +192,6 @@
     async function carregarAgendamentosAdmin() {
       const tbody = document.getElementById("tabela-agendamentos");
       
-      // Buscar agendamentos com join nos profissionais
       const { data, error } = await _supabase
         .from("agendamentos")
         .select(`id, cliente_nome, data_agendamento, hora_agendamento, profissional_id, profissionais(nome)`)
