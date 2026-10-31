@@ -1,237 +1,260 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barba Studio - Painel Admin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <title>Barba Studio - Painel Administrativo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0d0d0d; color: #fff; }
-    .font-cinzel { font-family: 'Cinzel', serif; }
-    @media print {
-      .no-print { display: none !important; }
-      body { background-color: #fff !important; color: #000 !important; }
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #121212; color: #e0e0e0; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+    h1 { color: #f39c12; font-size: 1.5rem; }
+    .btn-voltar { background: transparent; border: 1px solid #777; color: #ccc; padding: 8px 15px; border-radius: 5px; cursor: pointer; text-decoration: none; }
+    .btn-voltar:hover { background: #333; color: #fff; }
+
+    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-card h3 { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; text-transform: uppercase; }
+    .stat-card span { font-size: 1.8rem; font-weight: bold; color: #f39c12; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+    @media(max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .panel { background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 8px; }
+    .panel h2 { color: #f39c12; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
+    .form-group input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 5px; }
+    
+    .btn-success { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .btn-success:hover { background: #219653; }
+    .btn-info { width: 100%; padding: 10px; background: #2980b9; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .btn-info:hover { background: #2471a3; }
+    .btn-danger { width: 100%; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-danger:hover { background: #962d22; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
+    th { color: #f39c12; }
+    
+    .barbeiros-list { max-height: 150px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #333; border-radius: 5px; background: #252525; }
+    .barbeiro-item { padding: 8px 12px; border-bottom: 1px solid #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .barbeiro-item:hover { background: #333; }
+    .barbeiro-item.selected { background: #f39c12; color: #121212; font-weight: bold; }
   </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen">
+<body>
 
-  <div id="login-screen" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-    <div class="max-w-md w-full bg-neutral-900 border border-neutral-800 p-8 rounded-2xl shadow-2xl text-center">
-      <h2 class="text-2xl font-cinzel text-yellow-500 font-bold mb-4">ACESSO RESTRITO</h2>
-      <p class="text-xs text-neutral-400 mb-6">Insira a senha para acessar o painel administrativo.</p>
-      <input type="password" id="senha-input" placeholder="Digite a senha (1234)" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white text-center mb-4 focus:border-yellow-500 focus:outline-none">
-      <button onclick="autenticar()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg transition">Entrar</button>
+  <header>
+    <h1>BARBA STUDIO • PAINEL ADMINISTRATIVO</h1>
+    <a href="index.html" class="btn-voltar">← Voltar ao Site</a>
+  </header>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <h3>Total Agendamentos</h3>
+      <span id="stat-total">0</span>
+    </div>
+    <div class="stat-card">
+      <h3>Agendamentos Hoje</h3>
+      <span id="stat-hoje">0</span>
+    </div>
+    <div class="stat-card">
+      <h3>Barbeiros Ativos</h3>
+      <span id="stat-barbeiros">0</span>
     </div>
   </div>
 
-  <div id="admin-panel" class="hidden max-w-7xl mx-auto space-y-6">
-    <header class="flex justify-between items-center border-b border-neutral-800 pb-4">
-      <h1 class="text-2xl font-cinzel text-yellow-500 font-bold">BARBA STUDIO <span class="text-sm text-neutral-400 font-normal">• Painel Administrativo</span></h1>
-      <a href="index.html" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-4 py-2 rounded-lg text-sm transition no-print">← Voltar</a>
-    </header>
-
-    <div class="grid grid-cols-3 gap-4 text-center no-print">
-      <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
-        <p class="text-xs text-neutral-400">TOTAL GERAL</p>
-        <p id="total-geral" class="text-2xl font-bold text-yellow-500">0</p>
+  <div class="main-grid">
+    <!-- GESTÃO DE BARBEIROS -->
+    <div class="panel">
+      <h2>✂️ Gestão de Barbeiros</h2>
+      <div class="form-group">
+        <label>Barbeiros cadastrados (clique para selecionar):</label>
+        <div id="lista-barbeiros-admin" class="barbeiros-list">
+          <!-- Preenchido via JavaScript -->
+        </div>
       </div>
-      <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
-        <p class="text-xs text-neutral-400">HOJE</p>
-        <p id="total-hoje" class="text-2xl font-bold text-yellow-500">0</p>
+      <div class="form-group">
+        <input type="text" id="novo-barbeiro-nome" placeholder="Nome do novo barbeiro">
       </div>
-      <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-xl">
-        <p class="text-xs text-neutral-400">BARBEIROS</p>
-        <p id="total-barbeiros" class="text-2xl font-bold text-yellow-500">0</p>
-      </div>
+      <button class="btn-success" onclick="cadastrarBarbeiroAdmin()">+ Cadastrar Novo Barbeiro</button>
+      <button class="btn-info" onclick="listarClientesAdmin()">👥 Todos Clientes Cadastrados</button>
+      <button class="btn-danger" onclick="excluirBarbeiroSelecionado()">🗑️ Excluir Barbeiro Selecionado</button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
-        <div>
-          <h2 class="text-xl font-cinzel text-yellow-500 border-b border-neutral-800 pb-2 mb-4">✂️ GESTÃO DE BARBEIROS</h2>
-          <p class="text-xs text-neutral-400 mb-2">Barbeiros cadastrados:</p>
-          <div id="lista-barbeiros" class="space-y-2 max-h-52 overflow-y-auto pr-1">
-            <p class="text-xs text-neutral-500">Carregando...</p>
-          </div>
-        </div>
-        <div class="space-y-3 pt-4 border-t border-neutral-800 no-print">
-          <input type="text" id="novo-barbeiro-nome" placeholder="Nome do novo barbeiro" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm text-white focus:outline-none">
-          <button onclick="cadastrarBarbeiro()" class="w-full bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 font-semibold py-2 rounded-lg text-sm transition">+ Cadastrar Novo Barbeiro</button>
-          <button onclick="abrirClientesCadastrados()" class="w-full bg-emerald-800 hover:bg-emerald-700 text-emerald-300 font-bold py-2 rounded-lg text-sm transition border border-emerald-500">Todos Clientes Cadastrados</button>
-          <button onclick="excluirBarbeiroSelecionado()" class="w-full bg-red-600/80 hover:bg-red-600 text-white font-semibold py-2 rounded-lg text-sm transition">Excluir Barbeiro Selecionado</button>
-        </div>
-      </div>
-
-      <div class="lg:col-span-2 bg-neutral-900 border border-neutral-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
-        <div>
-          <h2 class="text-xl font-cinzel text-yellow-500 border-b border-neutral-800 pb-2 mb-4">📅 TODOS OS AGENDAMENTOS</h2>
-          <div class="overflow-x-auto max-h-80 overflow-y-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-neutral-800 text-yellow-500 text-sm">
-                  <th class="p-2">ID</th>
-                  <th class="p-2">Barbeiro</th>
-                  <th class="p-2">Cliente</th>
-                  <th class="p-2">Data</th>
-                  <th class="p-2">Hora</th>
-                  <th class="p-2 no-print">Ação</th>
-                </tr>
-              </thead>
-              <tbody id="tabela-agendamentos" class="text-sm divide-y divide-neutral-800">
-                <tr><td colspan="6" class="p-4 text-center text-neutral-500">Carregando...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="pt-4 border-t border-neutral-800 no-print">
-          <button onclick="window.print()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg text-sm transition flex items-center justify-center space-x-2 shadow-lg">
-            <span>🖨️</span>
-            <span>Baixar Relatório (PDF)</span>
-          </button>
-        </div>
+    <!-- TODOS OS AGENDAMENTOS -->
+    <div class="panel">
+      <h2>📅 Todos os Agendamentos</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Barbeiro</th>
+              <th>Cliente</th>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-agendamentos">
+            <tr><td colspan="6" style="text-align: center; color: #777;">A carregar agendamentos...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <div id="modal-relatorio" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
-    <div class="bg-neutral-900 border border-yellow-500/50 max-w-2xl w-full p-6 rounded-xl space-y-4">
-      <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
-        <h3 id="relatorio-titulo" class="text-lg font-cinzel text-yellow-500 font-bold">Relatório</h3>
-        <button onclick="fecharModalRelatorio()" class="text-neutral-400 hover:text-white text-xl">✕</button>
-      </div>
-      <div id="relatorio-corpo" class="max-h-96 overflow-y-auto"></div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
   <script>
+    const SUPABASE_URL = "https://amdiaevxeajvqktdrbnz.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGlhZXZ4ZWFqdnFrdGRyYm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTEzMjMsImV4cCI6MjEwODk4NzMyM30.8Dt7jMKYa49BU7b8LgArnRvKzOhPZCpBMqpz3uVfhL8";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let barbeiroSelecionadoId = null;
-    let barbeiroSelecionadoNome = null;
 
-    function autenticar() {
-      if (document.getElementById('senha-input').value === '1234') {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('admin-panel').classList.remove('hidden');
-        carregarPainel();
-      } else {
-        alert('Senha incorreta!');
-      }
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarDadosAdmin();
+    });
+
+    async function carregarDadosAdmin() {
+      await carregarBarbeirosAdmin();
+      await carregarAgendamentosAdmin();
     }
 
-    function carregarPainel() {
-      carregarBarbeirosAdmin();
-      carregarAgendamentosAdmin();
-    }
-
-    function carregarBarbeirosAdmin() {
-      const div = document.getElementById('lista-barbeiros');
-      const barbeiros = JSON.parse(localStorage.getItem('barba_studio_barbeiros') || '[]');
+    async function carregarBarbeirosAdmin() {
+      const container = document.getElementById("lista-barbeiros-admin");
+      const { data, error } = await _supabase.from("profissionais").select("*").order("id", { ascending: true });
       
-      document.getElementById('total-barbeiros').innerText = barbeiros.length;
-      div.innerHTML = barbeiros.length === 0 ? '<p class="text-xs text-neutral-500">Nenhum barbeiro.</p>' : '';
-      
-      barbeiros.forEach(b => {
-        div.innerHTML += `<div onclick="selecionarBarbeiro(${b.id}, '${b.nome}', this)" class="barbeiro-item cursor-pointer p-2 rounded-lg text-sm bg-neutral-800 hover:bg-neutral-700 transition"><span>${b.nome}</span></div>`;
-      });
-    }
-
-    function selecionarBarbeiro(id, nome, el) {
-      barbeiroSelecionadoId = id;
-      barbeiroSelecionadoNome = nome;
-      document.querySelectorAll('.barbeiro-item').forEach(i => i.classList.remove('border', 'border-yellow-500'));
-      el.classList.add('border', 'border-yellow-500');
-    }
-
-    function cadastrarBarbeiro() {
-      const nome = document.getElementById('novo-barbeiro-nome').value.trim();
-      if (!nome) return alert('Digite o nome do barbeiro');
-      
-      let barbeiros = JSON.parse(localStorage.getItem('barba_studio_barbeiros') || '[]');
-      const novoId = barbeiros.length > 0 ? Math.max(...barbeiros.map(b => b.id)) + 1 : 1;
-      barbeiros.push({ id: novoId, nome });
-      localStorage.setItem('barba_studio_barbeiros', JSON.stringify(barbeiros));
-      
-      document.getElementById('novo-barbeiro-nome').value = '';
-      carregarBarbeirosAdmin();
-      alert('Barbeiro cadastrado com sucesso!');
-    }
-
-    function excluirBarbeiroSelecionado() {
-      if (!barbeiroSelecionadoId) return alert('Selecione um barbeiro da lista!');
-      if (!confirm(`Deseja excluir o barbeiro ${barbeiroSelecionadoNome}?`)) return;
-
-      let barbeiros = JSON.parse(localStorage.getItem('barba_studio_barbeiros') || '[]');
-      barbeiros = barbeiros.filter(b => b.id !== barbeiroSelecionadoId);
-      localStorage.setItem('barba_studio_barbeiros', JSON.stringify(barbeiros));
-      
-      barbeiroSelecionadoId = null;
-      carregarBarbeirosAdmin();
-      alert('Barbeiro excluído com sucesso!');
-    }
-
-    function carregarAgendamentosAdmin() {
-      const tbody = document.getElementById('tabela-agendamentos');
-      const agendamentos = JSON.parse(localStorage.getItem('barba_studio_agendamentos') || '[]');
-      const barbeiros = JSON.parse(localStorage.getItem('barba_studio_barbeiros') || '[]');
-      
-      if (agendamentos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-neutral-500">Nenhum agendamento encontrado.</td></tr>';
-        document.getElementById('total-geral').innerText = '0';
-        document.getElementById('total-hoje').innerText = '0';
+      if (error || !data) {
+        container.innerHTML = '<div class="barbeiro-item">Erro ao carregar</div>';
+        document.getElementById("stat-barbeiros").innerText = "0";
         return;
       }
 
-      document.getElementById('total-geral').innerText = agendamentos.length;
-      const hojeStr = new Date().toISOString().split('T')[0];
-      document.getElementById('total-hoje').innerText = agendamentos.filter(a => a.data_agendamento === hojeStr).length;
+      document.getElementById("stat-barbeiros").innerText = data.length;
+      if (data.length === 0) {
+        container.innerHTML = '<div class="barbeiro-item">Nenhum barbeiro registado.</div>';
+        return;
+      }
 
-      tbody.innerHTML = '';
-      agendamentos.forEach(a => {
-        const barb = barbeiros.find(b => b.id == a.profissional_id);
-        const nomeBarbeiro = barb ? barb.nome : 'N/A';
+      container.innerHTML = "";
+      data.forEach(b => {
+        const div = document.createElement("div");
+        div.className = `barbeiro-item ${barbeiroSelecionadoId === b.id ? 'selected' : ''}`;
+        div.innerText = b.nome;
+        div.onclick = () => {
+          document.querySelectorAll('.barbeiro-item').forEach(el => el.classList.remove('selected'));
+          div.classList.add('selected');
+          barbeiroSelecionadoId = b.id;
+        };
+        container.appendChild(div);
+      });
+    }
+
+    async function cadastrarBarbeiroAdmin() {
+      const nomeInput = document.getElementById("novo-barbeiro-nome");
+      const nome = nomeInput.value.trim();
+      if (!nome) {
+        alert("Introduza o nome do barbeiro.");
+        return;
+      }
+
+      const { error } = await _supabase.from("profissionais").insert([{ nome }]);
+      if (error) {
+        alert("Erro ao cadastrar barbeiro: " + error.message);
+      } else {
+        alert("Barbeiro cadastrado com sucesso!");
+        nomeInput.value = "";
+        carregarBarbeirosAdmin();
+      }
+    }
+
+    async function excluirBarbeiroSelecionado() {
+      if (!barbeiroSelecionadoId) {
+        alert("Selecione um barbeiro na lista acima para excluir.");
+        return;
+      }
+      if (!confirm("Tem certeza que deseja excluir este barbeiro?")) return;
+
+      const { error } = await _supabase.from("profissionais").delete().eq("id", barbeiroSelecionadoId);
+      if (error) {
+        alert("Erro ao excluir: " + error.message);
+      } else {
+        alert("Barbeiro excluído com sucesso!");
+        barbeiroSelecionadoId = null;
+        carregarBarbeirosAdmin();
+      }
+    }
+
+    async function carregarAgendamentosAdmin() {
+      const tbody = document.getElementById("tabela-agendamentos");
+      
+      // Buscar agendamentos com join nos profissionais
+      const { data, error } = await _supabase
+        .from("agendamentos")
+        .select(`id, cliente_nome, data_agendamento, hora_agendamento, profissional_id, profissionais(nome)`)
+        .order("data_agendamento", { ascending: true });
+
+      if (error || !data) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #c0392b;">Erro ao carregar agendamentos.</td></tr>`;
+        return;
+      }
+
+      document.getElementById("stat-total").innerText = data.length;
+      
+      const hojeStr = new Date().toISOString().split('T')[0];
+      const agendamentosHoje = data.filter(a => a.data_agendamento === hojeStr);
+      document.getElementById("stat-hoje").innerText = agendamentosHoje.length;
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777;">Nenhum agendamento encontrado.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = "";
+      data.forEach(a => {
+        const nomeBarbeiro = a.profissionais ? a.profissionais.nome : "Desconhecido";
         tbody.innerHTML += `
-          <tr class="hover:bg-neutral-800/50">
-            <td class="p-2 text-yellow-500 font-bold">#${a.id}</td>
-            <td class="p-2">${nomeBarbeiro}</td>
-            <td class="p-2">${a.cliente_nome}</td>
-            <td class="p-2">${a.data_agendamento}</td>
-            <td class="p-2 text-yellow-500 font-bold">${a.hora_agendamento}</td>
-            <td class="p-2 no-print"><button onclick="cancelarAgendamentoDireto(${a.id})" class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">Cancelar</button></td>
+          <tr>
+            <td>${a.id}</td>
+            <td>${nomeBarbeiro}</td>
+            <td>${a.cliente_nome}</td>
+            <td>${a.data_agendamento}</td>
+            <td>${a.hora_agendamento}</td>
+            <td><button onclick="excluirAgendamento(${a.id})" style="background:#c0392b;color:#fff;border:none;padding:5px 8px;border-radius:4px;cursor:pointer;">Excluir</button></td>
           </tr>
         `;
       });
     }
 
-    function cancelarAgendamentoDireto(id) {
-      if (confirm('Deseja realmente cancelar este agendamento?')) {
-        let agendamentos = JSON.parse(localStorage.getItem('barba_studio_agendamentos') || '[]');
-        agendamentos = agendamentos.filter(a => a.id !== id);
-        localStorage.setItem('barba_studio_agendamentos', JSON.stringify(agendamentos));
+    async function excluirAgendamento(id) {
+      if (!confirm("Deseja cancelar/excluir este agendamento?")) return;
+      const { error } = await _supabase.from("agendamentos").delete().eq("id", id);
+      if (error) {
+        alert("Erro ao excluir agendamento.");
+      } else {
         carregarAgendamentosAdmin();
       }
     }
 
-    function abrirClientesCadastrados() {
-      const clientes = JSON.parse(localStorage.getItem('barba_studio_clientes') || '[]');
-      let corpo = clientes.length === 0 ? '<p class="text-center p-4">Nenhum cliente cadastrado.</p>' : 
-        `<table class="w-full text-left text-sm"><thead><tr class="text-yellow-500 border-b border-neutral-800"><th class="p-2">Nome</th><th class="p-2">Telefone</th><th class="p-2">Senha</th></tr></thead><tbody>` +
-        clientes.map(c => `<tr class="border-b border-neutral-800"><td class="p-2">${c.nome}</td><td class="p-2">${c.telefone}</td><td class="p-2">${c.senha}</td></tr>`).join('') + `</tbody></table>`;
-      
-      document.getElementById('relatorio-titulo').innerText = "Clientes Cadastrados";
-      document.getElementById('relatorio-corpo').innerHTML = corpo;
-      document.getElementById('modal-relatorio').classList.remove('hidden');
-      document.getElementById('modal-relatorio').classList.add('flex');
-    }
-
-    function fecharModalRelatorio() {
-      document.getElementById('modal-relatorio').classList.add('hidden');
-      document.getElementById('modal-relatorio').classList.remove('flex');
+    async function listarClientesAdmin() {
+      const { data, error } = await _supabase.from("clientes").select("nome, telefone, email");
+      if (error || !data) {
+        alert("Erro ao buscar clientes.");
+        return;
+      }
+      if (data.length === 0) {
+        alert("Nenhum cliente cadastrado ainda.");
+        return;
+      }
+      let lista = "CLIENTES CADASTRADOS:\n\n";
+      data.forEach(c => {
+        lista += `Nome: ${c.nome} | Tel: ${c.telefone} | Email: ${c.email || 'Não informado'}\n`;
+      });
+      alert(lista);
     }
   </script>
 </body>
