@@ -1,7 +1,16 @@
-// --- CONFIGURAÇÃO NUVEM REAL SUPABASE ---
-const SUPABASE_URL = "https://vrozoxdpbqoklknqjrrz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyb3pveGRwYnFva2xrbnFqcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg2NjksImV4cCI6MjEwODc5NDY2OX0.zi81eJfWzn0bEDYu-HGVU-mJKqB8IS-dAzpMdayUWc8";
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- CONFIGURAÇÃO NUVEM SUPABASE ---
+const SUPABASE_URL = "https://amdiaevxeajvqktdrbnz.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZGlhZXZ4ZWFqdnFrdGRyYm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MTEzMjMsImV4cCI6MjEwODk4NzMyM30.8Dt7jMKYa49BU7b8LgArnRvKzOhPZCpBMqpz3uVfhL8";
+
+// Inicialização segura global para evitar erros
+let _supabase = null;
+try {
+  if (window.supabase) {
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (e) {
+  console.error("Erro ao inicializar Supabase:", e);
+}
 
 let clienteLogado = null;
 
@@ -28,7 +37,7 @@ function mostrarTela(idTela) {
 
 async function carregarBarbeirosIndex() {
   const selectBarbeiro = document.getElementById("barbeiro-select");
-  if (!selectBarbeiro) return;
+  if (!selectBarbeiro || !_supabase) return;
 
   try {
     const { data, error } = await _supabase.from("profissionais").select("*").order("id", { ascending: true });
@@ -53,6 +62,11 @@ async function carregarBarbeirosIndex() {
 
 async function cadastrarCliente(event) {
   event.preventDefault();
+  if (!_supabase) {
+    alert("Erro de conexão com a base de dados.");
+    return;
+  }
+
   const nome = document.getElementById("cadastro-nome").value.trim();
   const telefone = document.getElementById("cadastro-telefone").value.trim();
   const email = document.getElementById("cadastro-email").value.trim();
@@ -76,6 +90,8 @@ async function cadastrarCliente(event) {
 
 async function fazerLogin(event) {
   event.preventDefault();
+  if (!_supabase) return;
+
   const telefone = document.getElementById("login-telefone").value.trim();
   const senha = document.getElementById("login-senha").value.trim();
 
@@ -96,6 +112,7 @@ async function fazerLogin(event) {
 
 async function recuperarSenhaSms(event) {
   event.preventDefault();
+  if (!_supabase) return;
   const telefone = document.getElementById("esqueci-telefone").value.trim();
 
   try {
@@ -132,7 +149,7 @@ function sairCliente() {
 
 async function realizarAgendamento(event) {
   event.preventDefault();
-  if (!clienteLogado) return mostrarTela("card-login");
+  if (!clienteLogado || !_supabase) return mostrarTela("card-login");
 
   const profissionalId = document.getElementById("barbeiro-select").value;
   const dataAgendamento = document.getElementById("data-agendamento").value;
